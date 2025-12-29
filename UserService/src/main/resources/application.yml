@@ -1,0 +1,22 @@
+server:
+  port: 8090
+spring:
+  application:
+    name: userService
+  sql:
+    init:
+      mode: always
+      platform: postgres
+  datasource:
+    url: jdbc:postgresql://localhost:5432/webshop
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+app:
+ jwt:
+  exp: 300
+  refresh-exp: 3600

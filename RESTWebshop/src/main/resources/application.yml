@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: webshop
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/webshop
+    username: postgres
+    password: root
+    pool:
+      initial-size: 5
+      max-size: 20
+
+  sql:
+    init:
+      mode: always
+      platform: postgres
