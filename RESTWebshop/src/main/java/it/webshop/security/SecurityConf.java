@@ -47,9 +47,10 @@ public class SecurityConf {
         http.authorizeExchange(auth -> auth
                 .pathMatchers(HttpMethod.OPTIONS).permitAll()
                 .pathMatchers("/inserisci/**", "/modifica/**", "/api/v1.0/**").hasRole("USER")
+                .pathMatchers("/.well-known/**").permitAll()
                 .anyExchange().authenticated()
-            )
-            .addFilterAt(jwtFilter, SecurityWebFiltersOrder.AUTHENTICATION);
+            );
+            //.addFilterAt(jwtFilter, SecurityWebFiltersOrder.AUTHENTICATION);
 
         return http.build();
     }
