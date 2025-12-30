@@ -1,0 +1,124 @@
+REQUEST CHE FACCIIO
+http://localhost:8090/login?response_type=code&client_id=client&scope=openid&redirect_uri=http://localhost:3000/&code_challenge=b133a0c0e9bee3be20163d2ad31d6248db292aa6dcb1ee087a2aa50e0fc75ae2&code_challenge_method=S256
+
+REQUEST DA FARE
+http://localhost:8090/oauth2/authorize?response_type=code&client_id=client&scope=openid profile&redirect_uri=http://localhost:3000/&code_challenge=NWViYTZlNmY5Yzk2MWUxNGE0NjQ5MjI2ZTFkMzYwZGU1OThlMmMzZDQyNGQ3ZjJmZDkyZTczMDhkYzc5Nzk2MQ==&code_challenge_method=S256
+
+---
+http://localhost:8090/oidc/authorize?response_type=code&client_id=client&scope=openid&redirect_uri=http://localhost:3000&code_challenge=b133a0c0e9bee3be20163d2ad31d6248db292aa6dcb1ee087a2aa50e0fc75ae2&code_challenge_method=S256
+
+
+
+
+
+quando tento di ottenere authentication code non mi rendirizza al url indicato ma c erca una risorsa sul server che chiaramente non esiste e restituisce 404
+
+questa è la richiesta che faccio è la seguente
+http://localhost:8090/login?response_type=code&client_id=client&scope=openid&redirect_uri=http://localhost:3000/&code_challenge=b133a0c0e9bee3be20163d2ad31d6248db292aa6dcb1ee087a2aa50e0fc75ae2&code_challenge_method=S256
+
+quindi non ottengo authorization code, la richiesta che dovrei fare successivamente è 
+http://localhost:8090/token?client_id=client&redirect_uri=http://localhost:3000&grant_type=authorization_code&code_verifier=ciao&code=
+
+con basic authentication client-secret
+
+il codice della configurazione
+package it.userservice.security;
+
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.web.bind.annotation.CrossOrigin;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConf {
+	
+	@Bean
+	public BCryptPasswordEncoder encoder() {
+		return new BCryptPasswordEncoder();
+	}
+	
+	@Bean
+	public AuthenticationManager manager(AuthenticationConfiguration conf) {
+		return conf.getAuthenticationManager();
+	}
+	
+	@Bean
+	@Order(1)
+	public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http)
+            throws Exception {
+
+        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
+                new OAuth2AuthorizationServerConfigurer();
+
+        http
+            .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
+            .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+            .csrf(csrf -> csrf.ignoringRequestMatchers(
+                    authorizationServerConfigurer.getEndpointsMatcher()))
+            .apply(authorizationServerConfigurer);
+
+        return http.build();
+    }
+	
+	@Bean
+	@Order(2)
+	public SecurityFilterChain filter(HttpSecurity http) {
+		http.formLogin(Customizer.withDefaults());
+		
+		http.authorizeHttpRequests(auth -> {
+			auth.anyRequest().authenticated();
+		});
+		
+		return http.build();
+	}
+	
+	@Bean
+	public RegisteredClientRepository clientRepo() {
+		RegisteredClient c=RegisteredClient.withId(UUID.randomUUID().toString())
+				.clientId("client")
+				.clientSecret("secret")
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.redirectUri("http://localhost:3000/")
+				.scope(OidcScopes.OPENID)
+				.build();
+		
+		return new InMemoryRegisteredClientRepository(c);
+	}
+}
+
+
+i log dopo il login
+GET "/login?response_type=code&client_id=client&scope=openid&redirect_uri=http://localhost:3000/&code_challenge=b133a0c0e9bee3be20163d2ad31d6248db292aa6dcb1ee087a2aa50e0fc75ae2&code_challenge_method=S256&continue", parameters={masked}
+[2m2025-12-30T11:42:28.612+01:00[0;39m [32mDEBUG[0;39m [35m22316[0;39m [2m--- [UserService] [nio-8090-exec-9] [0;39m[36mo.s.w.s.handler.SimpleUrlHandlerMapping [0;39m [2m:[0;39m Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
+[2m2025-12-30T11:42:28.617+01:00[0;39m [32mDEBUG[0;39m [35m22316[0;39m [2m--- [UserService] [nio-8090-exec-9] [0;39m[36mo.s.w.s.r.ResourceHttpRequestHandler    [0;39m [2m:[0;39m Resource not found
+[2m2025-12-30T11:42:28.617+01:00[0;39m [32mDEBUG[0;39m [35m22316[0;39m [2m--- [UserService] [nio-8090-exec-9] [0;39m[36m.w.s.m.s.DefaultHandlerExceptionResolver[0;39m [2m:[0;39m Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource login for request '/login'.]
+[2m2025-12-30T11:42:28.617+01:00[0;39m [32mDEBUG[0;39m [35m22316[0;39m [2m--- [UserService] [nio-8090-exec-9] [0;39m[36mo.s.web.servlet.DispatcherServlet       [0;39m [2m:[0;39m Completed 404 NOT_FOUND
+[2m2025-12-30T11:42:28.617+01:00[0;39m [32mDEBUG[0;39m [35m22316[0;39m [2m--- [UserService] [nio-8090-exec-9] [0;39m[36mo.s.web.servlet.DispatcherServlet       [0;39m [2m:[0;39m "ERROR" dispatch for GET "/error?response_type=code&client_id=client&scope=openid&redirect_uri=http://localhost:3000/&code_challenge=b133a0c0e9bee3be20163d2ad31d6248db292aa6dcb1ee087a2aa50e0fc75ae2&code_challenge_method=S256&continue", parameters={masked}
+[2m2025-12-30T11:42:28.617+01:00[0;39m [32mDEBUG[0;39m [35m22316[0;39m [2m--- [UserService] [nio-8090-exec-9] [0;39m[36ms.w.s.m.m.a.RequestMappingHandlerMapping[0;39m [2m:[0;39m Mapped to org.springframework.boot.webmvc.autoconfigure.error.BasicErrorController#errorHtml(HttpServletRequest, HttpServletResponse)
+[2m2025-12-30T11:42:28.617+01:00[0;39m [32mDEBUG[0;39m [35m22316[0;39m [2m--- [UserService] [nio-8090-exec-9] [0;39m[36mo.s.w.s.v.ContentNegotiatingViewResolver[0;39m [2m:[0;39m Selected 'text/html' given [text/html, text/html;q=0.8]
+[2m2025-12-30T11:42:28.617+01:00[0;39m [32mDEBUG[0;39m [35m22316[0;39m [2m--- [UserService] [nio-8090-exec-9] [0;39m[36mo.s.web.servlet.DispatcherServlet       [0;39m [2m:[0;39m Exiting from "ERROR" dispatch, status 404

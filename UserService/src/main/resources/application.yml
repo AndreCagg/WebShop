@@ -20,3 +20,10 @@ app:
  jwt:
   exp: 300
   refresh-exp: 3600
+
+logging:
+ level:
+  org:
+   springframework:
+    web: debug
+    security: debug
