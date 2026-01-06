@@ -3,7 +3,7 @@ import api from "../../API/Config/ConfigNetwork"
 
 class DettListinoService{
     getDettListinoByCodart(id, listini, stateManager, errManager){
-        api.get("http://localhost:8080/api/v1.0/dettlistini/"+id, { withCredentials: true })
+        api.get("http://localhost:9090/api/v1.0/proxy/dettlistini/"+id, { withCredentials: true })
             .then(resp => {
                 const nuoviDettListini = {};
 

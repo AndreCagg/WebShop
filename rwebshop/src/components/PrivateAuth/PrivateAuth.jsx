@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useContext } from "react"
 import { Navigate, Outlet } from "react-router-dom"
 import api from "../../API/Config/ConfigNetwork"
+import { AuthContext } from "../../API/AuthService/Auth"
 
 const PrivateRoutes = () => {
+  const { tokens } = useContext(AuthContext);
   const [auth, setAuth] = useState(null);
 
   useEffect(() => {
@@ -10,7 +12,7 @@ const PrivateRoutes = () => {
   }, []);
 
   async function isLogged(){
-    await api.get("http://localhost:8090/api/v1.0/utenti/isLogged", { withCredentials: true }).then(resp => {
+    await api.get("http://localhost:9090/api/v1.0/logged", { withCredentials: true }).then(resp => {
       
       if(resp.status == 200){
         setAuth(true);
@@ -28,6 +30,14 @@ const PrivateRoutes = () => {
       auth ? <Outlet/> : <Navigate to='/'/>
     )
   }
+
+  /*if(tokens["access_token"]==""){
+    return <Navigate to="/"/>
+  }else{
+    return <Outlet />
+  }*/
+
+  //return <Outlet />
 }
 
 export default PrivateRoutes;

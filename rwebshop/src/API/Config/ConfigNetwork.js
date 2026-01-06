@@ -1,7 +1,17 @@
 import axios from "axios";
-const api=axios.create({
-    withCredentials: true
-});
+let tokens=null;
+
+const api=axios.create({withCredentials: true});
+
+/*api.interceptors.request.use(
+    config => {
+        if (tokens?.access_token) {
+            config.headers['Authorization'] = `Bearer ${tokens.access_token}`;
+        }
+        return config;
+    },
+    error => Promise.reject(error)
+);*/
 
 api.interceptors.response.use(
     response => {
@@ -35,5 +45,11 @@ api.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+
+export function setTokens(t){
+    if(t["access_token"]){
+        tokens=t;
+    }
+}
 
 export default api;

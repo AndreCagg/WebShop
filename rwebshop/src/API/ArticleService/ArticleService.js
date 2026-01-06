@@ -8,7 +8,7 @@ class ArticleService{
 
     getArticles(filter, status, limit, page, stateManager, errManager){
         let rows=parseInt(limit)==0?10:limit;
-        return api.get("http://localhost:8080/api/v1.0/articoli", {
+        return api.get("http://localhost:9090/api/v1.0/proxy/articoli", {
             params: {
                 filter: filter,
                 status: status,
@@ -25,7 +25,7 @@ class ArticleService{
     }
 
     getArticleById(id, stateManager, errManager){
-        api.get("http://localhost:8080/api/v1.0/articoli/"+id).then(resp =>{
+        api.get("http://localhost:9090/api/v1.0/proxy/articoli/"+id).then(resp =>{
             let obj=resp.data;
             
             stateManager({
@@ -52,7 +52,7 @@ class ArticleService{
 
         api({
             method: method,
-            url: "http://localhost:8080/api/v1.0/articoli",
+            url: "http://localhost:9090/api/v1.0/proxy/articoli",
             data: {
                 codart: values.codart,
                 descrizione: values.descrizione,
@@ -70,7 +70,7 @@ class ArticleService{
     }
 
     deleteArticle(id, filter, status, rows, pagetogo, stateManager, errManager){
-        api.delete("http://localhost:8080/api/v1.0/articoli/"+id).then(() => {
+        api.delete("http://localhost:9090/api/v1.0/proxy/articoli/"+id).then(() => {
             this.getArticles(filter, status, rows, pagetogo, stateManager, errManager);
             errManager(false);
         }).catch(err => errManager(true));
