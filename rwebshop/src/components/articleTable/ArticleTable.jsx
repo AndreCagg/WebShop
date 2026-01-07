@@ -3,10 +3,10 @@ import { useState } from "react"
 import { useEffect } from "react"
 import Row from "./Row";
 import ArticleService from "../../API/ArticleService/ArticleService";
-
+import { RotatingLines } from "react-loader-spinner";
 
 const ArticleTable = (props) =>{
-    const [articles, setArticles] = useState([]);
+    const [articles, setArticles] = useState(null);
     const [error, setError] = useState(false);
 
     useEffect(() => {
@@ -25,39 +25,54 @@ const ArticleTable = (props) =>{
         ArticleService.deleteArticle(id, props.filter, props.status, props.rows, props.pageToGo, setArticles, setError);
     }
 
-    if(error){
-        return <h1>Si è verificato un errore</h1>
-    }else{
+    if(articles==null){
         return (
-                <div className="mt-4">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Cod. Art</th>
-                                <th>Descrizione</th>
-                                <th>Stato</th>
-                                <th>Prezzo</th>
-                                <th></th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {articles.map(art => {
-                                let prezzo=Math.min(...art.prezzoListini.map(l => parseFloat(l.prezzo)));
-                                if(prezzo==Infinity){
-                                    prezzo="";
-                                }
+            <div className="mt-4">
+                <RotatingLines
+                    strokeColor="grey"
+                    strokeWidth="5"
+                    width="90"
+                    visible={true}
+                />
+            </div>
+        )
+    }else{
+        if(error){
+            return <h1>Si è verificato un errore</h1>
+        }else{
+            return (
+                    <div className="mt-4">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Cod. Art</th>
+                                    <th>Descrizione</th>
+                                    <th>Stato</th>
+                                    <th>Prezzo</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                articles.map(art => {
+                                    let prezzo=Math.min(...art.prezzoListini.map(l => parseFloat(l.prezzo)));
+                                    if(prezzo==Infinity){
+                                        prezzo="";
+                                    }
 
-                                return <Row key={art.codart} 
-                                codart={art.codart} 
-                                descrizione={art.descrizione}
-                                stato={art.stato}
-                                prezzo={prezzo} onDelete={eliminaArt} onEditArticle={setArticles} onErrorTable={setError}></Row>
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            );
+                                    return <Row key={art.codart} 
+                                    codart={art.codart} 
+                                    descrizione={art.descrizione}
+                                    stato={art.stato}
+                                    prezzo={prezzo} onDelete={eliminaArt} onEditArticle={setArticles} onErrorTable={setError}></Row>
+                                })
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                );
+        }
     }
 }
 

@@ -1,43 +1,24 @@
 package it.userservice.controller;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.server.authorization.settings.ConfigurationSettingNames.Client;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nimbusds.jose.shaded.gson.Gson;
 
-import it.userservice.conf.JwtConf;
-import it.userservice.dto.JwtTokenRequest;
+//import it.userservice.conf.JwtConf;
 import it.userservice.dto.UserRegisterRequest;
 import it.userservice.entity.Ruoli;
 import it.userservice.entity.User;
-import it.userservice.service.impl.AuthenticationServ;
+/*import it.userservice.service.impl.AuthenticationServ;
 import it.userservice.service.impl.CookieServ;
-import it.userservice.service.impl.JwtServ;
+import it.userservice.service.impl.JwtServ;*/
 import it.userservice.service.impl.UserServ;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/api/v1.0/utenti")
@@ -47,7 +28,7 @@ public class UserController {
 	@Autowired
 	private UserServ servUser;
 	
-	@Autowired
+	/*@Autowired
 	private AuthenticationServ servAuth;
 	
 	@Autowired
@@ -57,7 +38,7 @@ public class UserController {
 	private CookieServ servCookie;
 	
 	@Autowired
-	private JwtConf confJwt;
+	private JwtConf confJwt;*/
 	
 	
 	/*@GetMapping("/isLogged")
@@ -101,13 +82,13 @@ public class UserController {
 	}*/
 	
 	@PostMapping("/register")
-	public ResponseEntity register(@RequestBody UserRegisterRequest req) {
+	public ResponseEntity<String> register(@RequestBody UserRegisterRequest req) {
 		List<String> ruoli_str=req.getRuoli();
 		List<Ruoli> ruoli=new ArrayList<>();
 		
 		for(String s : ruoli_str) {
 			Ruoli r=new Ruoli();
-			r.setRuolo(s);
+			r.setRuolo(s.trim());
 			ruoli.add(r);
 		}
 		

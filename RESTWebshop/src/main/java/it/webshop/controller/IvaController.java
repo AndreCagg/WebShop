@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 
 @Controller
 @RequestMapping("/api/v1.0/iva")
-@CrossOrigin(origins="http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins="http://localhost:9090", allowCredentials = "true")
 public class IvaController {
 	@Autowired
 	private IIvaServ servIva;

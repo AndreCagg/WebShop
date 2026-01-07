@@ -54,10 +54,10 @@ public class UserServ implements IUserServ {
 		return this.repoUser.save(u);
 	}
 	
-	@Override
+	/*@Override
 	public Boolean isLogged(String jwt) {
 		JwtServ serv=new JwtServ();
 		return serv.isValid(jwt);
-	}
+	}*/
 
 }

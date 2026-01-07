@@ -47,7 +47,7 @@ class ArticleService{
         let method="post";
         //console.log(values);
         if(!insert){
-            method="patch";
+            method="put";
         }
 
         api({

@@ -19,10 +19,6 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: true
-app:
- jwt:
-  exp: 300
-  refresh-exp: 3600
 
 logging:
  level:

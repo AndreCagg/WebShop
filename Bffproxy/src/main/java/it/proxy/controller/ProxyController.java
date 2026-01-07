@@ -8,12 +8,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,11 +19,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,14 +33,16 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/api/v1.0")
-@CrossOrigin(origins="http://localhost:3000", allowCredentials="true")
+@CrossOrigin(
+	    origins = "http://localhost:3000",
+	    allowCredentials = "true"
+	)
 public class ProxyController {
 	private Map<String, String> codeVerifiers;
 	
@@ -65,16 +64,16 @@ public class ProxyController {
 		String state=UUID.randomUUID().toString();
 		codeVerifiers.put(state, codeVerifier);
 		
-		//session.setAttribute("code_verifier", codeVerifier);
-		//session.setAttribute("code_challenge", codeChallenge);
+		UriComponentsBuilder urlBuilding=UriComponentsBuilder.fromUriString("http://localhost:8090/oauth2/authorize");
+		urlBuilding.queryParam("response_type", "code");
+		urlBuilding.queryParam("client_id", "client");
+		urlBuilding.queryParam("redirect_uri", "http://localhost:9090/api/v1.0/callback");
+		urlBuilding.queryParam("code_challenge", codeChallenge);
+		urlBuilding.queryParam("code_challenge_method", "S256");
+		urlBuilding.queryParam("state", state);
+		//String url="http://localhost:8090/oauth2/authorize?response_type=code&client_id=client&redirect_uri=http://localhost:9090/api/v1.0/callback&code_challenge="+codeChallenge+"&code_challenge_method=S256&state="+state;
 		
-		String url="http://localhost:8090/oauth2/authorize?response_type=code&client_id=client&redirect_uri=http://localhost:9090/api/v1.0/callback&code_challenge="+codeChallenge+"&code_challenge_method=S256&state="+state;
-		
-		/*Cookie c=new Cookie("JSESSIONID", session.getId());
-		c.setHttpOnly(true);
-		c.setPath("/");
-		resp.addCookie(c);*/
-		resp.sendRedirect(url);
+		resp.sendRedirect(urlBuilding.build().toString());
 	}
 	
 	@GetMapping("/callback")
@@ -137,15 +136,17 @@ public class ProxyController {
 	
 	//tutte le altre richieste
 	@RequestMapping("/proxy/**")
+	//@DeleteMapping("/proxy/**")
 	public ResponseEntity<String> doRequest(HttpServletRequest req, HttpServletResponse resp, HttpSession session, @RequestBody(required=false) String body) throws IOException{
 		
 		ResponseEntity<String> ret=null;
 		if(session.getAttribute("access_token")!=null) {
 			ret=this.tryRequest(req, session, body);
 			
-			if(ret.getStatusCode()==HttpStatus.UNAUTHORIZED) {
+			
+			if(ret.getStatusCode()==HttpStatus.INTERNAL_SERVER_ERROR) {
 				String token=session.getAttribute("refresh_token").toString();
-				if(token==null || this.tryRefresh(session, token)==HttpStatus.UNAUTHORIZED) {
+				if(token==null || this.tryRefresh(session, token)!=HttpStatus.OK) {
 					session.setAttribute("logged", false);
 					resp.sendRedirect("http://localhost:3000/");
 					//return new ResponseEntity<String>("FAIL", HttpStatus.UNAUTHORIZED);
@@ -184,11 +185,15 @@ public class ProxyController {
 		try{
 			ret=template.exchange(url, HttpMethod.valueOf(req.getMethod()), entity, String.class);
 		}catch(RestClientException e) {
+			/*System.out.println(e.getMessage());
+			System.out.println(e.getMostSpecificCause());
 			if(e instanceof HttpClientErrorException.Unauthorized) {
 				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 			}else {
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-			}
+			}*/
+			
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 		
 		return ret;
@@ -212,11 +217,13 @@ public class ProxyController {
 		try{
 			resp=template.exchange("http://localhost:8090/oauth2/token", HttpMethod.POST, entity, new ParameterizedTypeReference<Map<String, String>>(){});
 		}catch(RestClientException e) {
-			if(e instanceof HttpClientErrorException.Unauthorized) {
+			/*if(e instanceof HttpClientErrorException.Unauthorized) {
 				return HttpStatus.UNAUTHORIZED;
 			}else {
 				return HttpStatus.INTERNAL_SERVER_ERROR;
-			}
+			}*/
+			
+			return HttpStatus.INTERNAL_SERVER_ERROR;
 		}
 		
 		Map<String, String> tokens=resp.getBody();

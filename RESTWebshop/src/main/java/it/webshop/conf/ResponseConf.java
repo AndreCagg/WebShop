@@ -1,30 +1,19 @@
 package it.webshop.conf;
 
-import java.util.List;
-
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import org.springframework.web.reactive.config.CorsRegistry;
+import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 @Configuration
-public class ResponseConf {
-	@Bean
-	public CorsConfigurationSource corsConfigurationSource() {
-	    CorsConfiguration config = new CorsConfiguration();
+public class ResponseConf implements WebFluxConfigurer {
 
-	    config.setAllowedOriginPatterns(List.of("http://localhost:3000"));
-	    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-	    config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-	    config.setAllowCredentials(true);
-	    config.setMaxAge(3600L);
-
-	    UrlBasedCorsConfigurationSource source =
-	            new UrlBasedCorsConfigurationSource();
-	    source.registerCorsConfiguration("/**", config);
-
-	    return source;
-	}
+    @Override
+    public void addCorsMappings(CorsRegistry corsRegistry) {
+        corsRegistry.addMapping("/**")
+          .allowedOrigins("http://localhost:9090")
+          .allowedMethods("PUT", "POST", "GET", "PATCH", "DELETE", "OPTIONS")
+          .maxAge(3600);
+    }
 
 }

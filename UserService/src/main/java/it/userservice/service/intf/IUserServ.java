@@ -8,5 +8,5 @@ import it.userservice.entity.User;
 public interface IUserServ {
 	public User cerca(String id);
 	public User crea(String user, String psw, List<Ruoli> ruoli);
-	public Boolean isLogged(String jwt);
+	//public Boolean isLogged(String jwt);
 }

@@ -13,7 +13,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Controller
-@CrossOrigin(origins="http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins="http://localhost:9090", allowCredentials = "true")
 @RequestMapping("/api/v1.0/famass")
 public class FamAssController {
 	@Autowired

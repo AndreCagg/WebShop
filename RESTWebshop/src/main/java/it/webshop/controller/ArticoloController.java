@@ -9,9 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,10 +24,7 @@ import reactor.core.publisher.Mono;
 import it.webshop.dto.ArticoloDTO;
 
 
-@CrossOrigin(
-		  origins = "http://localhost:3000",
-		  allowCredentials = "true"
-		)
+@CrossOrigin(origins = "http://localhost:9090", allowCredentials = "true")
 
 @RestController
 @RequestMapping("/api/v1.0/articoli")
@@ -80,7 +77,7 @@ public class ArticoloController {
 		        );
 	}
 	
-	@PatchMapping(consumes="application/json")
+	@PutMapping(consumes="application/json")
 	public Mono<ResponseEntity<String>> aggiornaArticolo(@RequestBody ArticoloDTO body) {
 		return this.servArticolo.salvaArticolo(body, false)
 		        .thenReturn(ResponseEntity.status(HttpStatus.CREATED).body("OK"))
